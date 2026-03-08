@@ -1,8 +1,8 @@
 ---
-name: hive
+name: hivehome
 description: Control and query Hive Home (UK) smart heating, hot water, lights and devices via the unofficial API. Use when the user mentions Hive, Hive Home, Hive thermostat, smart heating, Hive app, British Gas Hive, or wants to automate or script Hive devices.
 license: MIT
-compatibility: Requires Python 3, pip install pyhiveapi, network access. Hive UK account (my.hivehome.com). For non-interactive use set HIVE_DEVICE_* env vars after first login.
+compatibility: Requires Python 3, pyhiveapi>=1.0.0, network access. Hive UK account (my.hivehome.com). For non-interactive use set HIVE_DEVICE_* env vars after first login.
 homepage: https://github.com/yourusername/agent-skills
 metadata:
   {"openclaw":{"homepage":"https://www.hivehome.com","requires":{"env":["HIVE_USERNAME","HIVE_PASSWORD"]}},"clawdbot":{"emoji":"🏠","requires":{"env":["HIVE_USERNAME","HIVE_PASSWORD"]},"primaryEnv":"HIVE_USERNAME","files":["scripts/*"]}}
@@ -18,7 +18,7 @@ Control Hive thermostats, hot water, lights and other devices programmatically. 
 
 ## Bundled scripts
 
-From the skill root (e.g. `hive/` or the skill directory loaded by your agent):
+From the skill root (e.g. `hivehome/` or the skill directory loaded by your agent):
 
 ```bash
 # Status (heating + hot water)
@@ -43,6 +43,17 @@ python scripts/hive_control.py --zone 1 set-temp 20
 
 Requires `HIVE_USERNAME`, `HIVE_PASSWORD`; for non-interactive use (e.g. agent runs) set `HIVE_DEVICE_GROUP_KEY`, `HIVE_DEVICE_KEY`, `HIVE_DEVICE_PASSWORD` after one interactive first-time login.
 
+## Credentials
+
+**Required env vars:** `HIVE_USERNAME`, `HIVE_PASSWORD`. For automation (no 2FA each run): `HIVE_DEVICE_GROUP_KEY`, `HIVE_DEVICE_KEY`, `HIVE_DEVICE_PASSWORD`.
+
+**Where to set them:**
+- **Generic / Cursor / CLI:** Set in your shell (`export HIVE_USERNAME=...`) or in a local `.env` file that is **not committed**. Run the script in an environment where these are set.
+- **OpenClaw:** Set in `~/.openclaw/openclaw.json` under `skills.entries.hivehome.env`. OpenClaw injects these into the process for the agent run; they are not put in prompts or logs.
+- **Other agents:** Use that agent’s recommended way to inject env vars or secrets so the skill’s scripts see them at runtime.
+
+**Agent instruction:** If credentials are missing, do not ask the user to paste passwords or keys in chat. Tell them to set the required environment variables (or configure the skill in their agent’s config) and run the script again. See [references/CREDENTIALS.md](references/CREDENTIALS.md) for platform-specific notes.
+
 ## When to use this skill
 
 - User asks to control Hive heating, thermostat, or hot water.
@@ -51,7 +62,7 @@ Requires `HIVE_USERNAME`, `HIVE_PASSWORD`; for non-interactive use (e.g. agent r
 
 ## Prerequisites
 
-- **Python 3** with `pyhiveapi` installed: `pip install pyhiveapi`
+- **Python 3** with **pyhiveapi>=1.0.0** (session API): `pip install "pyhiveapi>=1.0.0"`. If you see attribute or method errors, run `pip install -U pyhiveapi` and try again.
 - **Hive account** (UK; my.hivehome.com). First-time login requires **SMS 2FA**; subsequent logins can use device credentials to avoid 2FA.
 
 ## Authentication

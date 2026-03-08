@@ -9,7 +9,8 @@
 """
 Hive Home CLI – status and control for heating, hot water. Uses Pyhiveapi.
 Run from skill dir: python scripts/hive_control.py <command> [options]
-Requires: pip install pyhiveapi; env HIVE_USERNAME, HIVE_PASSWORD (and device keys for non-interactive use).
+Requires: pyhiveapi>=1.0.0 (pip install "pyhiveapi>=1.0.0"); env HIVE_USERNAME, HIVE_PASSWORD (and device keys for non-interactive use).
+If you see attribute/method errors, upgrade: pip install -U pyhiveapi
 """
 
 import argparse

@@ -19,9 +19,9 @@ https://agentskills.io/home
 
 | Skill | Description |
 |-------|-------------|
-| [Hive Home](hive/) | Control UK Hive thermostats, hot water, and lights via the unofficial API (Pyhiveapi). |
+| [Hive Home](hivehome/) | Control UK Hive thermostats, hot water, and lights via the unofficial API (Pyhiveapi). |
 
-Add skills via your agent’s skill/ClawHub mechanism; see each skill’s `README.md` and `SKILL.md` for setup and usage.
+Add skills via your agent’s skill/ClawHub mechanism; see each skill’s `README.md` and `SKILL.md` for setup and usage. Skills that need credentials document required env vars; set them in your environment or your agent’s config—never commit secrets.
 
 ## License
 
