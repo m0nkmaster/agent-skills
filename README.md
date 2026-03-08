@@ -12,6 +12,9 @@
 
 Open-source agent skills—instructions and configs for AI coding assistants (e.g. Cursor, OpenClaw). No official support, no promises.
 
+We follow these standards:
+https://agentskills.io/home
+
 ## Skills
 
 | Skill | Description |

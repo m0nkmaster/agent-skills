@@ -1,15 +1,15 @@
 # Hive Home
 
-Control Hive Home (UK) thermostats, hot water, lights and devices via the unofficial API from your OpenClaw agent.
+Control Hive Home (UK) thermostats, hot water, lights and devices via the unofficial API from your agent. This skill follows the [Agent Skills](https://agentskills.io/home) format (SKILL.md, scripts/, references/).
 
 ## What it does
 
 - **Heating:** Read and set mode (SCHEDULE, HEAT, OFF), target temperature, boost (duration + temperature).
 - **Hot water:** Read and set mode, boost duration.
-- **Lights:** Read state, brightness, colour temp; control via Pyhiveapi session.
+- **Lights:** Read state, brightness, colour temp; control via Pyhiveapi session (custom code; not in CLI).
 - **Auth:** First-time login with SMS 2FA; device credentials for subsequent runs (no 2FA).
 
-The skill teaches the agent to use the [Pyhiveapi](https://github.com/Pyhass/Pyhiveapi) Python library. Hive does not provide a public API; Pyhiveapi talks to the same backend as the Hive app.
+The skill includes **bundled scripts** (`scripts/hive_control.py`) for status, set-temp, mode, boost, and hot water. The agent runs these by default. For lights or custom logic it uses the [Pyhiveapi](https://github.com/Pyhass/Pyhiveapi) library. Hive does not provide a public API; Pyhiveapi talks to the same backend as the Hive app.
 
 ## How to use
 
@@ -20,9 +20,9 @@ The skill teaches the agent to use the [Pyhiveapi](https://github.com/Pyhass/Pyh
    After first login with 2FA, optionally set for device login (no 2FA):
    - `HIVE_DEVICE_GROUP_KEY`, `HIVE_DEVICE_KEY`, `HIVE_DEVICE_PASSWORD`
 3. **Enable the skill** in OpenClaw (workspace skills or ClawHub install).
-4. Ask the agent to control heating, set temperature, boost hot water, etc. It will generate Python using Pyhiveapi or guide you through the steps.
+4. Ask the agent to control heating, set temperature, boost hot water, etc. It will **run the bundled scripts** (e.g. `python scripts/hive_control.py status` or `set-temp 21`). For lights or custom behaviour it may generate Pyhiveapi code.
 
-See [SKILL.md](SKILL.md) for full instructions and code examples.
+See [SKILL.md](SKILL.md) for script usage and code examples. Detailed API reference: [references/REFERENCE.md](references/REFERENCE.md).
 
 ## Requirements
 

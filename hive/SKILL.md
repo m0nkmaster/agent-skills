@@ -1,16 +1,47 @@
 ---
-name: hive-home
+name: hive
 description: Control and query Hive Home (UK) smart heating, hot water, lights and devices via the unofficial API. Use when the user mentions Hive, Hive Home, Hive thermostat, smart heating, Hive app, British Gas Hive, or wants to automate or script Hive devices.
+license: MIT
+compatibility: Requires Python 3, pip install pyhiveapi, network access. Hive UK account (my.hivehome.com). For non-interactive use set HIVE_DEVICE_* env vars after first login.
 homepage: https://github.com/yourusername/agent-skills
 metadata:
-  {"openclaw":{"homepage":"https://www.hivehome.com","requires":{"env":["HIVE_USERNAME","HIVE_PASSWORD"]}},"clawdbot":{"emoji":"🏠","requires":{"env":["HIVE_USERNAME","HIVE_PASSWORD"]},"primaryEnv":"HIVE_USERNAME"}}
+  {"openclaw":{"homepage":"https://www.hivehome.com","requires":{"env":["HIVE_USERNAME","HIVE_PASSWORD"]}},"clawdbot":{"emoji":"🏠","requires":{"env":["HIVE_USERNAME","HIVE_PASSWORD"]},"primaryEnv":"HIVE_USERNAME","files":["scripts/*"]}}
 ---
 
 # Hive Home (UK)
 
 Control Hive thermostats, hot water, lights and other devices programmatically. Hive does **not** provide a public API; this skill uses the community **Pyhiveapi** library, which talks to the same backend as the Hive app.
 
+**Prefer the bundled scripts** for common actions. Run `scripts/hive_control.py` from the skill directory (or `{baseDir}/scripts/hive_control.py` when the agent has the skill path). Only generate custom Pyhiveapi code when the user needs something the scripts do not support (e.g. lights, multi-zone by name, or custom logic).
+
 **Important:** The API is unofficial. Never hardcode credentials or 2FA codes in prompts, logs or code. Use environment variables or a secure secret store.
+
+## Bundled scripts
+
+From the skill root (e.g. `hive/` or the skill directory loaded by your agent):
+
+```bash
+# Status (heating + hot water)
+python scripts/hive_control.py status
+
+# Heating
+python scripts/hive_control.py set-temp 21
+python scripts/hive_control.py mode heat
+python scripts/hive_control.py mode schedule
+python scripts/hive_control.py boost 30 21    # 30 min at 21°C
+python scripts/hive_control.py boost-off
+
+# Hot water
+python scripts/hive_control.py hotwater-boost 30
+python scripts/hive_control.py hotwater-boost-off
+python scripts/hive_control.py hotwater-mode schedule
+python scripts/hive_control.py hotwater-mode off
+
+# Multiple zones (default zone 0)
+python scripts/hive_control.py --zone 1 set-temp 20
+```
+
+Requires `HIVE_USERNAME`, `HIVE_PASSWORD`; for non-interactive use (e.g. agent runs) set `HIVE_DEVICE_GROUP_KEY`, `HIVE_DEVICE_KEY`, `HIVE_DEVICE_PASSWORD` after one interactive first-time login.
 
 ## When to use this skill
 
@@ -143,13 +174,13 @@ if lights:
 
 ## Additional resources
 
-- Full API surface, auth flow diagram and links: [reference.md](reference.md)
+- Full API surface, auth flow diagram and links: [references/REFERENCE.md](references/REFERENCE.md)
 - Pyhiveapi: [GitHub](https://github.com/Pyhass/Pyhiveapi), [Session examples](https://pyhass.github.io/pyhiveapi.docs/docs/examples/session/)
 - Home Assistant Hive integration (same backend): [home-assistant.io/integrations/hive](https://www.home-assistant.io/integrations/hive/)
 
 ## External endpoints
 
-This skill instructs the agent to use the **Pyhiveapi** Python library. When the user runs generated code (or the agent runs it), the following endpoints are used. No direct HTTP calls are made from the skill itself; Pyhiveapi encapsulates them.
+This skill ships **scripts** (`scripts/hive_control.py`) that call the **Pyhiveapi** Python library. The agent should run these scripts for common actions. When the user needs unsupported behaviour (e.g. lights), the agent may generate Pyhiveapi code. In all cases, only the following endpoints are used. No direct HTTP is made from the skill; Pyhiveapi encapsulates it.
 
 | Purpose | Endpoint / host | Data sent |
 |--------|------------------|-----------|
@@ -157,7 +188,7 @@ This skill instructs the agent to use the **Pyhiveapi** Python library. When the
 | Device login | Same | Username, password, device group key, device key, device password |
 | Device control (heating, hot water, lights, etc.) | Same | Session token; device IDs and command payloads (e.g. target temperature, mode) |
 
-Credentials and 2FA codes must be supplied via environment variables or user input; the skill never contains or logs them.
+Credentials and 2FA codes must be supplied via environment variables or user input; the skill never contains or logs them. The bundled script includes a SECURITY MANIFEST header (env vars and endpoints used).
 
 ## Security and privacy
 
