@@ -40,17 +40,17 @@ After `session.startSession()`:
 | `getOperationModes()` | Returns list of modes (e.g. SCHEDULE, HEAT, OFF) |
 | `getMode(device)` | Current mode |
 | `getState(device)` | Current state |
-| `currentTemperature(device)` | Current temp |
-| `targetTemperature(device)` | Target temp |
-| `minmaxTemperature(device)` | Min/max allowed |
-| `getBoost(device)` | Whether boost is on |
+| `getCurrentTemperature(device)` | Current temp |
+| `getTargetTemperature(device)` | Target temp |
+| `getMinTemperature(device)` / `getMaxTemperature(device)` | Min/max allowed |
+| `getBoostStatus(device)` | Whether boost is on |
 | `getBoostTime(device)` | Boost time left |
 | `getScheduleNowNextLater(device)` | Schedule windows |
 | `setMode(device, mode)` | e.g. "SCHEDULE", "HEAT", "OFF" |
 | `setTargetTemperature(device, temp)` | Integer °C |
-| `turnBoostOn(device, minutes, temp)` | Boost heating |
-| `turnBoostOff(device)` | Cancel boost |
-| `currentOperation(device)` | Current operation state |
+| `setBoostOn(device, mins, temp)` | Boost heating (mins: str or int, temp: float) |
+| `setBoostOff(device)` | Cancel boost |
+| `getCurrentOperation(device)` | Current operation state |
 
 ## Hot water (`session.hotwater`)
 
@@ -63,8 +63,8 @@ After `session.startSession()`:
 | `getBoostTime(device)` | Time remaining |
 | `getScheduleNowNextLater(device)` | Schedule |
 | `setMode(device, mode)` | e.g. "OFF", "SCHEDULE" |
-| `turnBoostOn(device, minutes)` | Boost hot water |
-| `turnBoostOff(device)` | Cancel boost |
+| `setBoostOn(device, mins)` | Boost hot water (mins: int) |
+| `setBoostOff(device)` | Cancel boost |
 
 ## Lights (`session.light`)
 
