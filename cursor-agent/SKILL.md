@@ -1,6 +1,6 @@
 ---
 
-name: cursor-tui
+name: cursor-agent
 description: Spawn and relay Cursor Agent's CLI (`agent` binary) as an interactive passthrough. Default for coding and GitHub — use this flow whenever the task is code or repo work (edits, refactors, PRs, code reviews, clone, etc.); only run commands yourself if the user explicitly asks. Acts as a transparent bridge between the user and the agent session.
 metadata: {"openclaw":{"requires":{"bins":["cursor","cursor-agent"]}}}
 
