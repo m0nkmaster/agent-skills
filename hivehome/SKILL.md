@@ -137,9 +137,9 @@ if heating:
     # Read
     session.heating.getMode(zone)
     session.heating.getState(zone)
-    session.heating.currentTemperature(zone)
-    session.heating.targetTemperature(zone)
-    session.heating.getBoost(zone)
+    session.heating.getCurrentTemperature(zone)
+    session.heating.getTargetTemperature(zone)
+    session.heating.getBoostStatus(zone)
     session.heating.getBoostTime(zone)
     session.heating.getOperationModes()  # e.g. SCHEDULE, HEAT, OFF
 
@@ -147,8 +147,8 @@ if heating:
     session.heating.setMode(zone, "SCHEDULE")
     session.heating.setMode(zone, "HEAT")
     session.heating.setTargetTemperature(zone, 21)
-    session.heating.turnBoostOn(zone, 30, 21)   # 30 min at 21°C
-    session.heating.turnBoostOff(zone)
+    session.heating.setBoostOn(zone, 30, 21)   # 30 min at 21°C
+    session.heating.setBoostOff(zone)
 ```
 
 ## Hot water
@@ -161,8 +161,8 @@ if water_heaters:
     session.hotwater.getBoost(hw)
     session.hotwater.setMode(hw, "OFF")
     session.hotwater.setMode(hw, "SCHEDULE")
-    session.hotwater.turnBoostOn(hw, 30)
-    session.hotwater.turnBoostOff(hw)
+    session.hotwater.setBoostOn(hw, 30)
+    session.hotwater.setBoostOff(hw)
 ```
 
 ## Lights
@@ -180,7 +180,7 @@ if lights:
 ## Quick reference
 
 - **Modes (heating):** `SCHEDULE`, `HEAT`, `OFF` (and others per `getOperationModes()`).
-- **Temperatures:** Use integers (e.g. `21` for 21°C). Check `session.heating.minmaxTemperature(zone)` for limits.
+- **Temperatures:** Use integers (e.g. `21` for 21°C). Check `session.heating.getMinTemperature(zone)` / `session.heating.getMaxTemperature(zone)` for limits.
 - **Boost:** Heating boost takes (minutes, target_temp); hot water boost takes (minutes) only.
 
 ## Additional resources

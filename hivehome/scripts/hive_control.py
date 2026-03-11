@@ -58,9 +58,9 @@ def cmd_status(session, _args):
     for i, h in enumerate(heating):
         name = h.get("hiveName", "Heating") + (f" ({i})" if len(heating) > 1 else "")
         mode = session.heating.getMode(h)
-        cur = session.heating.currentTemperature(h)
-        tgt = session.heating.targetTemperature(h)
-        boost = session.heating.getBoost(h)
+        cur = session.heating.getCurrentTemperature(h)
+        tgt = session.heating.getTargetTemperature(h)
+        boost = session.heating.getBoostStatus(h)
         lines.append(f"Heating {name}: mode={mode} current={cur}°C target={tgt}°C boost={boost}")
     for i, w in enumerate(water):
         name = w.get("hiveName", "Hot water") + (f" ({i})" if len(water) > 1 else "")
@@ -89,8 +89,30 @@ def cmd_mode(session, args):
         print("No heating device found.", file=sys.stderr)
         sys.exit(1)
     zone = heating[args.zone_index]
-    session.heating.setMode(zone, args.mode.upper())
-    print(f"Heating mode set to {args.mode.upper()}.")
+    # API expects SCHEDULE, MANUAL, OFF (not HEAT)
+    mode_map = {"HEAT": "MANUAL", "MANUAL": "MANUAL", "SCHEDULE": "SCHEDULE", "OFF": "OFF"}
+    api_mode = mode_map.get(args.mode.upper(), args.mode.upper())
+
+    if api_mode == "MANUAL":
+        # Hive often only applies MANUAL when target is sent in the same request
+        target = getattr(args, "temp", None)
+        if target is None:
+            target = session.heating.getTargetTemperature(zone)
+            if target is None or target < 5:
+                target = 20
+        target = int(round(float(target)))
+        product = session.data.products.get(zone["hiveID"], {})
+        ptype = product.get("type", "heating")
+        session.hiveRefreshTokens()
+        resp = session.api.setState(ptype, zone["hiveID"], mode="MANUAL", target=str(target))
+        if resp.get("original") == 200:
+            session.getDevices(zone["hiveID"])
+            print(f"Heating mode set to MANUAL at {target}°C.")
+        else:
+            print(f"Heating mode set to MANUAL (target {target}°C). API response: {resp.get('original')}", file=sys.stderr)
+    else:
+        session.heating.setMode(zone, api_mode)
+        print(f"Heating mode set to {api_mode}.")
 
 
 def cmd_boost(session, args):
@@ -99,7 +121,7 @@ def cmd_boost(session, args):
         print("No heating device found.", file=sys.stderr)
         sys.exit(1)
     zone = heating[args.zone_index]
-    session.heating.turnBoostOn(zone, args.minutes, args.temp)
+    session.heating.setBoostOn(zone, str(args.minutes), float(args.temp))
     print(f"Heating boost on for {args.minutes} min at {args.temp}°C.")
 
 
@@ -109,7 +131,7 @@ def cmd_boost_off(session, args):
         print("No heating device found.", file=sys.stderr)
         sys.exit(1)
     zone = heating[args.zone_index]
-    session.heating.turnBoostOff(zone)
+    session.heating.setBoostOff(zone)
     print("Heating boost off.")
 
 
@@ -119,7 +141,7 @@ def cmd_hotwater_boost(session, args):
         print("No hot water device found.", file=sys.stderr)
         sys.exit(1)
     hw = water[args.zone_index]
-    session.hotwater.turnBoostOn(hw, args.minutes)
+    session.hotwater.setBoostOn(hw, args.minutes)
     print(f"Hot water boost on for {args.minutes} min.")
 
 
@@ -129,7 +151,7 @@ def cmd_hotwater_boost_off(session, args):
         print("No hot water device found.", file=sys.stderr)
         sys.exit(1)
     hw = water[args.zone_index]
-    session.hotwater.turnBoostOff(hw)
+    session.hotwater.setBoostOff(hw)
     print("Hot water boost off.")
 
 
@@ -156,8 +178,9 @@ def main():
     p_set.add_argument("temp", type=int, help="Target temperature in °C")
     p_set.set_defaults(zone_index=0)
 
-    p_mode = sub.add_parser("mode", help="Set heating mode (SCHEDULE, HEAT, OFF)")
-    p_mode.add_argument("mode", choices=["schedule", "heat", "off"], help="Mode")
+    p_mode = sub.add_parser("mode", help="Set heating mode (SCHEDULE, MANUAL/heat, OFF)")
+    p_mode.add_argument("mode", choices=["schedule", "heat", "manual", "off"], help="Mode (heat = manual)")
+    p_mode.add_argument("temp", type=int, nargs="?", default=None, help="For heat/manual: target °C (default: current or 20)")
     p_mode.set_defaults(zone_index=0)
 
     p_boost = sub.add_parser("boost", help="Turn heating boost on")
