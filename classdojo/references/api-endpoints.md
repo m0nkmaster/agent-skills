@@ -50,12 +50,3 @@ All subsequent requests must include the `dojo_login.sid` and `dojo_home_login.s
 |--------|------|---------|
 | GET | `/notification` | List notifications |
 | POST | `/markNotificationRead` | Mark notifications read |
-
-## Known Account IDs
-
-| Entity | ID |
-|--------|----|
-| Parent | `5ec3b7790dfcbc1819952ec4` |
-| Student 1 | `5e7c84d75f8f36d133eddf0e` |
-| Student 2 | `5eec913e1634abe97e805598` |
-| Class | `687a96dc9a7b92b942b9b338` |
