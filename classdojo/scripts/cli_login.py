@@ -13,7 +13,7 @@ import argparse
 import getpass
 from pathlib import Path
 
-SESSION_FILENAME = ".classdojo_session.json"
+SESSION_FILENAME = "~./.classdojo_session.json"
 
 LOGIN_URL = "https://home.classdojo.com/api/session"
 

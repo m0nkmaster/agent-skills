@@ -1,129 +1,87 @@
 ---
 name: classdojo
-description: Query and interact with ClassDojo parent portal. Use when the user asks about school messages, teacher communications, class stories, student progress, calendar events, or anything ClassDojo-related. Do NOT use for general school questions unrelated to ClassDojo.
+description: Query ClassDojo parent portal. Use for school messages, teacher communications, class stories, student progress, calendar events, or anything ClassDojo-related. Triggers on "ClassDojo", "school message", "teacher message", "how is [student] doing", "class story", "school app".
 ---
 
 # ClassDojo Parent Portal
 
-You help parents access their children's school information through the ClassDojo web app.
+This skill queries the ClassDojo parent portal API.
 
-## Authentication
+## ⚡ QUICK START (For AI)
 
-ClassDojo requires session cookies obtained by logging in with email and password.
+When user asks ANYTHING about ClassDojo:
 
-## Bundled scripts location
+1. **Run auth check:** `cd ~/.cursor/skills/classdojo && python3 scripts/client.py session-check`
+2. **If NOT authenticated:** Ask user for email/password, then run: `cd ~/.cursor/skills/classdojo && python3 scripts/cli_login.py --email "EMAIL" --password "PASSWORD"`
+3. **Make API call:** Use commands from the table below
+4. **Parse JSON and respond conversationally**
 
-The helper scripts are bundled with this skill and should be run from:
+**CRITICAL:** You (the AI) run these commands. Python3 IS installed. Do NOT ask the user to run commands.
 
-`~/.cursor/skills/classdojo/`
+## CRITICAL: How to Handle Any Request
 
-Scripts:
-- `scripts/client.py`
-- `scripts/cli_login.py`
+For EVERY ClassDojo request, follow this exact workflow:
 
-### Before every request, check for an active session
+### 1. Check Auth Status (ALWAYS DO THIS FIRST)
 
-1. Run `scripts/client.py session-check`
-2. If the response contains `"authenticated": true`, proceed with the request.
-3. If the response contains `"authenticated": false`, ask the user for their ClassDojo email and password, then run:
-   ```
-   # Preferred (safe for special characters like $, &, !):
-   printf '%s' '<password>' | python scripts/cli_login.py --email '<email>' --password-stdin
+Execute:
+```bash
+cd ~/.cursor/skills/classdojo && python3 scripts/client.py session-check
+```
 
-   # Alternative:
-   python scripts/cli_login.py --email '<email>' --password-prompt
-   ```
-4. If login succeeds the session is saved automatically. Retry the original request.
-5. If login fails, tell the user to double-check their credentials.
+**Interpret the result:**
+- Output contains `"authenticated": true` → Go to step 3
+- Output contains `"authenticated": false` or any error → Go to step 2
 
-Never log or echo back the user's password.
+### 2. Login If Needed
 
-### Shell quoting and encoding pitfalls
+Say to user: "I need your ClassDojo email and password to access your account."
 
-- Do not pass passwords containing shell metacharacters unquoted.
-- Avoid `--password ...` unless you are certain quoting is correct.
-- Use `--password-stdin` or `--password-prompt` to avoid interpolation issues that look like auth failures.
+When user provides credentials, execute (replace with actual values):
+```bash
+cd ~/.cursor/skills/classdojo && python3 scripts/cli_login.py --email "USER_PROVIDED_EMAIL" --password "USER_PROVIDED_PASSWORD"
+```
 
-## Account Context
+If successful: "Logged in. Session saved..." appears → Go to step 3  
+If failed: Tell user credentials didn't work, ask them to try again
 
-- **Parent ID**: `5ec3b7790dfcbc1819952ec4`
-- **Student IDs**: `5e7c84d75f8f36d133eddf0e`, `5eec913e1634abe97e805598`
-- **Class ID**: `687a96dc9a7b92b942b9b338`
+### 3. Make API Request
 
-## API Calls
+Execute the appropriate command from the table below.
 
-All requests go through `scripts/client.py <endpoint>`. The script handles cookies and headers automatically.
+## API Commands Reference
 
-### Messages
+| User Request | Exact Command to Execute |
+|-------------|--------------------------|
+| "Any messages?" | `cd ~/.cursor/skills/classdojo && python3 scripts/client.py "/parent/5ec3b7790dfcbc1819952ec4/message-thread/page?limit=20"` |
+| "What's new?" / "Class stories" | `cd ~/.cursor/skills/classdojo && python3 scripts/client.py "/storyFeed?withStudentCommentsAndLikes=true&withSyntheticPosts=true"` |
+| "How is Alice?" | `cd ~/.cursor/skills/classdojo && python3 scripts/client.py "/storyFeed?withStudentCommentsAndLikes=true&withSyntheticPosts=true&studentId=5e7c84d75f8f36d133eddf0e"` |
+| "How is Bob?" | `cd ~/.cursor/skills/classdojo && python3 scripts/client.py "/storyFeed?withStudentCommentsAndLikes=true&withSyntheticPosts=true&studentId=5eec913e1634abe97e805598"` |
+| "Calendar" / "Events" | `cd ~/.cursor/skills/classdojo && python3 scripts/client.py "/parentCalendarEvent?hidePastEvents=false"` |
+| "Alice's info" | `cd ~/.cursor/skills/classdojo && python3 scripts/client.py "/parent/5ec3b7790dfcbc1819952ec4/student/5e7c84d75f8f36d133eddf0e"` |
+| "Dashboard" | `cd ~/.cursor/skills/classdojo && python3 scripts/client.py "/parent/5ec3b7790dfcbc1819952ec4/dashboard"` |
 
-| What | Command |
-|------|---------|
-| Recent threads | `scripts/client.py /parent/{parent_id}/message-thread/page?limit=20` |
-| Full conversation | `scripts/client.py /message-thread/{thread_id}` |
+## Response Format
 
-### Class Stories
+Parse the JSON output and respond like:
 
-| What | Command |
-|------|---------|
-| Story feed | `scripts/client.py /storyFeed?withStudentCommentsAndLikes=true&withSyntheticPosts=true` |
-| One student's stories | Append `&studentId={student_id}` to the above |
-| Story comments | `scripts/client.py /dojoClass/{class_id}/storyFeed/{story_id}/comments` |
-
-### Calendar
-
-| What | Command |
-|------|---------|
-| All events | `scripts/client.py /parentCalendarEvent?hidePastEvents=false` |
-| Event detail | `scripts/client.py /parentCalendarEvent/{event_id}` |
-| Event comments | `scripts/client.py /parentCalendarEvent/{event_id}/comments` |
-
-### Student Info
-
-| What | Command |
-|------|---------|
-| Student profile | `scripts/client.py /parent/{parent_id}/student/{student_id}` |
-| Dashboard | `scripts/client.py /parent/{parent_id}/dashboard` |
-
-## Answering Questions
-
-### "Any new messages?"
-1. Fetch message threads.
-2. Filter for `unreadCount > 0`, sort by `lastMessageTime` descending.
-3. Summarise each unread thread: sender name, time, and a short preview.
-
-### "How is [child] doing?"
-1. Fetch student info for the matching student ID.
-2. Fetch recent story feed filtered to that student.
-3. Summarise progress, recent activity, and any teacher comments.
-
-### "What's new in class?"
-1. Fetch the story feed (no student filter).
-2. Show the most recent 3–5 posts with author, content preview, likes, and comment count.
-
-### "What's on the school calendar?"
-1. Fetch calendar events.
-2. List upcoming events with title, date/time, and location.
-
-### General pattern
-For any ClassDojo question: authenticate → call the right endpoint → parse JSON → respond conversationally.
-
-## Response Style
-
-- Conversational and concise.
-- Bold teacher/student names and event titles.
-- Include timestamps as relative time (e.g. "2 hours ago").
-- Mention engagement counts (likes, comments) for stories.
-- If a story has photos or attachments, note that.
+- **Messages:** "New message from [Name] ([time]): '[preview]'"
+- **Stories:** "[Teacher] posted: '[content]' ([X] photos, [Y] likes)"
+- **Calendar:** "Upcoming: [Event] - [Date] at [Time]"
 
 ## Error Handling
 
-- **Not authenticated**: Ask for ClassDojo email and password, then log in.
-- **Session expired (401)**: Re-run login, then retry.
-- **No results**: "No [messages/stories/events] found right now."
-- **API error**: "ClassDojo isn't responding — please try again shortly."
+| Error | Action |
+|-------|--------|
+| "Session expired" or 401 | Go back to step 2, login again, then retry step 3 |
+| "No session found" | Go to step 2 and login |
+| Empty JSON/array | "No [items] found right now" |
+| Any HTTP error | "ClassDojo is temporarily unavailable" |
 
-## Security
+## Important Notes
 
-- Never store or display the user's password after login.
-- Session cookies are saved locally and treated as secrets.
-- Only access data belonging to the authenticated parent.
+- **Python3 is installed** - always use `python3` in commands
+- **You execute the commands** - don't ask the user to run them
+- **Never echo passwords** - use them in commands but don't show in responses
+- **Session persists** - after login, the session file is created automatically
+- **Always check auth first** - never skip step 1

@@ -11,7 +11,7 @@ import json
 import sys
 from pathlib import Path
 
-SESSION_FILENAME = ".classdojo_session.json"
+SESSION_FILENAME = "~./.classdojo_session.json"
 
 def _session_search_paths() -> list:
     """Return candidate paths for the session file, most specific first."""
