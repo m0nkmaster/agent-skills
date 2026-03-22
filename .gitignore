@@ -4,3 +4,4 @@ node_modules/
 configs/
 openclaw/
 .DS_Store
+*.har

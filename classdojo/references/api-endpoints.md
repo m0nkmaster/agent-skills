@@ -6,15 +6,23 @@ https://home.classdojo.com/api
 ```
 
 ## Authentication
-POST `/session` with `{"email": "…", "password": "…"}` returns session cookies.
-All subsequent requests must include the `dojo_login.sid` and `dojo_home_login.sid` cookies.
+
+- **Normal login:** `POST https://home.classdojo.com/api/session?duration=long` with JSON  
+  `{"login":"<email>","password":"<password>","resumeAddClassFlow":false}` (the web client may also send `email`).
+- **After email OTP (e.g. new sign-in location):** `POST https://teach.classdojo.com/api/session?duration=long` with  
+  `{"login":"<email>","password":"<password>","code":"<6-digit>"}`.
+
+Successful responses set session cookies used on `home.classdojo.com` for API calls.
+
+All subsequent requests must include the `dojo_login.sid` and `dojo_home_login.sid` cookies (names as observed in practice).
 
 ## Endpoints
 
 ### Session
 | Method | Path | Purpose |
 |--------|------|---------|
-| POST | `/session` | Log in (email + password) |
+| POST | `https://home.classdojo.com/api/session?duration=long` | Log in (email + password) |
+| POST | `https://teach.classdojo.com/api/session?duration=long` | Complete login with email **one-time code** (`code` in JSON body) |
 | GET | `/session?includeExtras=location&supportsChildAsParent=true` | Validate session |
 
 ### Messages

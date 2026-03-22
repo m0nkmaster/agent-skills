@@ -12,7 +12,7 @@ This skill queries the ClassDojo parent portal API.
 When user asks ANYTHING about ClassDojo:
 
 1. **Run auth check:** `cd ~/.cursor/skills/classdojo && python3 scripts/client.py session-check`
-2. **If NOT authenticated:** Ask user for email/password, then run: `cd ~/.cursor/skills/classdojo && python3 scripts/cli_login.py --email "EMAIL" --password "PASSWORD"`
+2. **If NOT authenticated:** Ask user for email/password, then run: `cd ~/.cursor/skills/classdojo && python3 scripts/cli_login.py --email "EMAIL" --password "PASSWORD"` (add `--code "123456"` if they were emailed a 6-digit OTP — see **Email OTP (new location)** below)
 3. **Make API call:** Use commands from the table below
 4. **Parse JSON and respond conversationally**
 
@@ -43,7 +43,21 @@ cd ~/.cursor/skills/classdojo && python3 scripts/cli_login.py --email "USER_PROV
 ```
 
 If successful: "Logged in. Session saved..." appears → Go to step 3  
-If failed: Tell user credentials didn't work, ask them to try again
+If failed: Tell user credentials didn't work, ask them to try again  
+If stderr mentions the 6-digit code / HTTP 401 after correct password: ClassDojo emailed an OTP — ask for the code, then run the same command with `--code "THE_CODE"` (or set `CLASSDOJO_OTP_CODE`)
+
+### Email OTP (new location / device)
+
+1. **Password step:** `POST https://home.classdojo.com/api/session?duration=long` with JSON  
+   `{"login":"<email>","password":"<password>","resumeAddClassFlow":false}`  
+   When a code is required, this returns **401** (response may include rate-limit headers such as `remaining-attempts`, `retry-after`).
+2. **OTP step:** `POST https://teach.classdojo.com/api/session?duration=long` with JSON  
+   `{"login":"<email>","password":"<password>","code":"<6-digit>"}`  
+   On success (**200**), session cookies are issued like a normal login.
+
+The parent portal UI strings for this flow live in `home.classdojo.com` locale pack `packages-one-time-codes` (e.g. “Enter the 6-digit code”, “We sent a one-time code to your email address”). Optional account MFA is a separate concept (`GET /api/parent/{id}/mfa`); this OTP is **not** the same as enabled TOTP MFA.
+
+**CLI:** `python3 scripts/cli_login.py --email "…" --password "…" --code "123456"`
 
 ### 3. Make API Request
 
@@ -73,7 +87,7 @@ Parse the JSON output and respond like:
 
 | Error | Action |
 |-------|--------|
-| "Session expired" or 401 | Go back to step 2, login again, then retry step 3 |
+| "Session expired" or 401 | Go back to step 2, login again (use `--code` if ClassDojo emails an OTP), then retry step 3 |
 | "No session found" | Go to step 2 and login |
 | Empty JSON/array | "No [items] found right now" |
 | Any HTTP error | "ClassDojo is temporarily unavailable" |
