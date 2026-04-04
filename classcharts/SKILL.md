@@ -1,6 +1,14 @@
 ---
 name: classcharts
 description: Query and interact with ClassCharts (UK education classroom management) via the classcharts-api JS library. Use when the user mentions ClassCharts, school behaviour points, homework, timetable, detentions, attendance, rewards shop, or wants to script/integrate with ClassCharts parent or student data.
+env:
+  - CLASSCHARTS_EMAIL
+  - CLASSCHARTS_PASSWORD
+  - CLASSCHARTS_CODE
+requirements:
+  - node
+  - npm
+install: npm install classcharts-api
 ---
 
 # ClassCharts API (JavaScript/TypeScript)
