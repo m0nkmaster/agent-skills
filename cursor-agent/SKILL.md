@@ -7,11 +7,23 @@ metadata:
   }
 ---
 
+<<<<<<< HEAD
 # Cursor Agent
+=======
+name: cursor-agent
+description: Spawn and relay Cursor Agent's CLI (`agent` binary) as an interactive passthrough. Default for coding and GitHub — use this flow whenever the task is code or repo work (edits, refactors, PRs, code reviews, clone, etc.); only run commands yourself if the user explicitly asks. Acts as a transparent bridge between the user and the agent session.
+metadata: {"openclaw":{"requires":{"bins":["agent"]}}}
+>>>>>>> bebb6aa (chore:cursor fixes)
 
 **Default for coding and GitHub.** If the task involves code, a repo, or GitHub (edits, refactors, code review, PRs, features, bugs, tests), use this skill and delegate to Cursor. The user does **not** need to say "Cursor" — assume Cursor for any coding/repo work.
 
+<<<<<<< HEAD
 **Triggers (use this skill):** code review, refactor, add feature, fix bug, write tests, review PR, open a PR, clone repo and…, work on repo X, speed up the app, improve code quality. No need for the user to mention Cursor.
+=======
+**Shell command is always `agent` — not `cursoragent`, not the skill name.** This skill may be listed as `cursor-agent` or `cursoragent`; those are labels only. In `exec`, use `"command": "agent"` (typically `/opt/homebrew/bin/agent` on this Mac).
+
+Spawn Cursor's `agent` in a PTY background session and relay its output and the user's inputs as a silent passthrough.
+>>>>>>> bebb6aa (chore:cursor fixes)
 
 Use the **`agent`** binary (Cursor's CLI) with the **bash** tool (PTY + workdir + background). Relay output and input via the **process** tool. Spawn in the target project directory — never in the OpenClaw workspace.
 
@@ -21,7 +33,15 @@ Cursor is run by executing the `agent` binary in a PTY. Do **not** use `sessions
 
 ## PTY + workdir + background (use bash tool)
 
+<<<<<<< HEAD
 Cursor Agent is an interactive terminal app. Always use the **bash** tool with PTY:
+=======
+### WhatsApp, Telegram, and most chat channels
+
+**Use only this skill (direct `agent` PTY).** Do **not** use `sessions_spawn` with `runtime: "acp"` for coding tasks — ACP is unreliable in these channels (thread binding, headless `acpx` queue owner, silent failures). The user primarily talks over WhatsApp and Telegram; this path is the supported one.
+
+## Cloud Agents
+>>>>>>> bebb6aa (chore:cursor fixes)
 
 ```bash
 bash pty:true workdir:<project-dir> background:true command:"agent"

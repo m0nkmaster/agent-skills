@@ -1,0 +1,35 @@
+{
+  "name": "@ada/apple-find",
+  "version": "1.0.0",
+  "description": "Apple Find My skill for OpenClaw - Query and locate Apple devices",
+  "main": "index.js",
+  "bin": {
+    "apple-find": "./index.js"
+  },
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "apple",
+    "find-my",
+    "findmy",
+    "icloud",
+    "location",
+    "tracking",
+    "openclaw",
+    "skill"
+  ],
+  "author": "Ada <ada@robmacdonald.com>",
+  "license": "MIT",
+  "dependencies": {
+    "findmy": "^2.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
